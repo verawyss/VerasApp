@@ -1,0 +1,74 @@
+name: Debug Backend Structure
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  check-structure:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Show complete directory structure
+      run: |
+        echo "=== COMPLETE REPOSITORY STRUCTURE ==="
+        tree -L 4 || find . -type f -o -type d | head -50
+    
+    - name: Check backend folder
+      run: |
+        echo "=== BACKEND FOLDER CONTENTS ==="
+        ls -la backend/ || echo "ERROR: backend/ folder not found!"
+    
+    - name: Check backend/api folder
+      run: |
+        echo "=== BACKEND/API FOLDER ==="
+        ls -la backend/api/ || echo "ERROR: backend/api/ folder not found!"
+    
+    - name: Check for [...path].js file
+      run: |
+        echo "=== LOOKING FOR [...path].js ==="
+        if [ -f "backend/api/[...path].js" ]; then
+          echo "✅ FOUND: backend/api/[...path].js"
+          echo "File size:"
+          ls -lh backend/api/[...path].js
+          echo "First 10 lines:"
+          head -10 backend/api/[...path].js
+        else
+          echo "❌ NOT FOUND: backend/api/[...path].js"
+        fi
+    
+    - name: Check package.json
+      run: |
+        echo "=== BACKEND package.json ==="
+        if [ -f "backend/package.json" ]; then
+          echo "✅ FOUND: backend/package.json"
+          cat backend/package.json
+        else
+          echo "❌ NOT FOUND: backend/package.json"
+        fi
+    
+    - name: Check for old files
+      run: |
+        echo "=== CHECKING FOR OLD STRUCTURE ==="
+        echo "Old src folder:"
+        ls -la backend/src/ 2>/dev/null || echo "✅ No old src/ folder (good!)"
+        echo "Old index.ts:"
+        ls -la backend/src/index.ts 2>/dev/null || echo "✅ No old index.ts (good!)"
+        echo "vercel.json:"
+        ls -la backend/vercel.json 2>/dev/null || echo "✅ No vercel.json (good!)"
+    
+    - name: Summary
+      run: |
+        echo "=== SUMMARY ==="
+        echo "✅ Things that SHOULD exist:"
+        echo "  - backend/api/[...path].js"
+        echo "  - backend/package.json (with type: module)"
+        echo ""
+        echo "❌ Things that should NOT exist:"
+        echo "  - backend/src/"
+        echo "  - backend/vercel.json"
+        echo "  - backend/tsconfig.json"
